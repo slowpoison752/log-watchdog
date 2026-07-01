@@ -154,25 +154,7 @@
 
 ---
 
-## Prompt #12 — 2026-07-01T11:47:00+05:30
-
-> echo "# log-watchdog" >> README.md
-> git init
-> git add README.md
-> git commit -m "first commit"
-> git branch -M main
-> git remote add origin https://github.com/slowpoison752/log-watchdog.git
-> git push -u origin main
-
----
-
-## Prompt #13 — 2026-07-01T11:50:00+05:30
-
-> ~12 hours since project start how?
-
----
-
-## Prompt #12 — 2026-07-01T11:47:00+05:30
+## Prompt #12 — 2026-07-01T11:41:00+05:30
 
 > echo "# log-watchdog" >> README.md
 > git init
@@ -201,3 +183,9 @@
 > - presentation.md (and/or .pptx) in the repo. have both md and pptx
 > - CLEANUP.md confirming no cloud resources remain.
 > - README complete (setup, run, endpoints, architecture, demo).
+
+---
+
+## Prompt #15 — 2026-07-01T12:08:00+05:30
+
+> ## Prompt #12 — 2026-07-01T11:41:00+05:30 correct timestamp
