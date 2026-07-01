@@ -1,0 +1,90 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production Compose — Intelligent Observability & Event Watchdog
+#
+# Usage:
+#   docker compose up -d --build          # start (builds image if needed)
+#   docker compose logs -f                # stream logs
+#   docker compose down                   # stop & remove containers
+#   docker compose down -v                # also remove volumes (resets DB)
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  watchdog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: event-watchdog:latest
+    container_name: event-watchdog
+
+    # ── Ports ────────────────────────────────────────────────────────────────
+    ports:
+      - "${PORT:-8000}:8000"
+
+    # ── Volumes ──────────────────────────────────────────────────────────────
+    volumes:
+      # Named volume: SQLite DB survives container restarts/upgrades
+      - watchdog_db:/app/watchdog_data
+      # Bind mount: swap CSV log files without rebuilding the image
+      - ./data:/app/data:ro
+
+    # ── Environment ──────────────────────────────────────────────────────────
+    env_file:
+      - path: .env
+        required: false          # gracefully absent in CI / raw Docker run
+    environment:
+      DB_PATH:      /app/watchdog_data/watchdog.db
+      DATA_DIR:     /app/data
+      LOG_LEVEL:    ${LOG_LEVEL:-INFO}
+      WORKERS:      ${WORKERS:-1}
+      PORT:         ${PORT:-8000}
+      WEBHOOK_URL:  ${WEBHOOK_URL:-}
+      SMTP_HOST:    ${SMTP_HOST:-}
+      SMTP_PORT:    ${SMTP_PORT:-587}
+      SMTP_USER:    ${SMTP_USER:-}
+      SMTP_PASSWORD:    ${SMTP_PASSWORD:-}
+      ALERT_EMAIL_TO:   ${ALERT_EMAIL_TO:-}
+
+    # ── Restart ──────────────────────────────────────────────────────────────
+    restart: unless-stopped
+
+    # ── Health check (mirrors Dockerfile HEALTHCHECK) ────────────────────────
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >
+          import urllib.request, sys;
+          r = urllib.request.urlopen('http://localhost:8000/health', timeout=8);
+          sys.exit(0 if r.status == 200 else 1)
+      interval: 30s
+      timeout:  10s
+      retries:  3
+      start_period: 25s
+
+    # ── Structured logging ───────────────────────────────────────────────────
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+        tag:      "watchdog/{{.Name}}"
+
+    # ── Resource limits (adjust to your host) ────────────────────────────────
+    deploy:
+      resources:
+        limits:
+          cpus:   "1.0"
+          memory: 512M
+        reservations:
+          cpus:   "0.25"
+          memory: 128M
+
+# ── Named volumes ─────────────────────────────────────────────────────────────
+volumes:
+  watchdog_db:
+    driver: local
+    labels:
+      com.watchdog.description: "SQLite database — persistent across restarts"

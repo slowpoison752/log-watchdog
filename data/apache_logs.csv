@@ -1,0 +1,61 @@
+timestamp,severity,source,message
+2005-12-04 00:02:14,notice,::1,jk2_init() Can't connect to Apache: 13 (Permission denied)
+2005-12-04 00:14:33,notice,::1,workerEnv in error state 3
+2005-12-04 00:28:07,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 00:41:55,error,127.0.0.1,File does not exist: /var/www/html/favicon.ico
+2005-12-04 00:55:22,notice,::1,jk2_init() Found child 3248 in error state
+2005-12-04 01:09:44,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 01:23:17,error,10.0.0.2,Directory index forbidden by rule: /var/www/html/
+2005-12-04 01:36:50,notice,::1,workerEnv in error state 3
+2005-12-04 01:50:14,notice,localhost,jk2_init() Can't connect to Apache: 13 (Permission denied)
+2005-12-04 02:04:39,error,127.0.0.1,File does not exist: /var/www/html/robots.txt
+2005-12-04 02:18:03,notice,::1,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 02:31:28,notice,localhost,workerEnv in error state 3
+2005-12-04 02:44:51,error,192.168.1.5,client denied by server configuration: /etc/httpd/htdocs
+2005-12-04 02:58:15,notice,::1,jk2_init() Can't connect to Apache: 13 (Permission denied)
+2005-12-04 03:12:40,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 03:26:04,error,10.0.0.3,Premature end of script headers: cgi-bin/test.pl
+2005-12-04 03:39:29,notice,::1,workerEnv in error state 3
+2005-12-04 03:52:53,notice,localhost,jk2_init() Found child 3249 in error state
+2005-12-04 04:06:18,error,127.0.0.1,File does not exist: /var/www/html/index.php
+2005-12-04 04:19:43,notice,::1,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 04:33:07,notice,localhost,workerEnv in error state 3
+2005-12-04 04:46:32,error,192.168.1.10,mod_jk child workerEnv in error state 6
+2005-12-04 04:59:58,notice,::1,jk2_init() Can't connect to Apache: 13 (Permission denied)
+2005-12-04 05:13:22,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 05:14:01,error,::1,mod_jk child workerEnv in error state 6
+2005-12-04 05:14:43,error,::1,mod_jk child workerEnv in error state 7
+2005-12-04 05:15:12,error,::1,mod_jk child init 1 -2
+2005-12-04 05:15:55,error,::1,mod_jk child workerEnv in error state 6
+2005-12-04 05:16:28,error,127.0.0.1,mod_jk child workerEnv in error state 6
+2005-12-04 05:17:01,error,::1,mod_jk child workerEnv in error state 8
+2005-12-04 05:17:33,error,::1,mod_jk child init 1 -2
+2005-12-04 05:18:05,error,127.0.0.1,Directory index forbidden by rule: /var/www/html/
+2005-12-04 05:18:38,error,::1,mod_jk child workerEnv in error state 6
+2005-12-04 05:19:10,error,192.168.1.5,File does not exist: /var/www/html/phpmyadmin
+2005-12-04 05:19:43,error,::1,mod_jk child workerEnv in error state 9
+2005-12-04 05:20:15,error,::1,mod_jk child init 1 -2
+2005-12-04 05:20:48,error,10.0.0.1,client denied by server configuration: /etc/httpd/htdocs
+2005-12-04 05:21:20,error,::1,mod_jk child workerEnv in error state 6
+2005-12-04 05:21:53,error,::1,Premature end of script headers: cgi-bin/admin.pl
+2005-12-04 05:22:25,error,127.0.0.1,mod_jk child workerEnv in error state 6
+2005-12-04 05:26:50,notice,::1,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 05:40:15,error,127.0.0.1,File does not exist: /var/www/html/favicon.ico
+2005-12-04 05:53:40,notice,::1,workerEnv in error state 3
+2005-12-04 06:07:04,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 06:20:29,error,10.0.0.4,Directory index forbidden by rule: /var/www/html/
+2005-12-04 06:33:53,notice,::1,jk2_init() Can't connect to Apache: 13 (Permission denied)
+2005-12-04 06:47:18,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 07:00:43,error,192.168.1.8,Premature end of script headers: cgi-bin/upload.pl
+2005-12-04 07:14:07,notice,::1,workerEnv in error state 3
+2005-12-04 07:27:32,notice,localhost,jk2_init() Found child 3250 in error state
+2005-12-04 07:40:57,error,127.0.0.1,File does not exist: /var/www/html/index.htm
+2005-12-04 07:54:21,notice,::1,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 08:07:46,notice,localhost,workerEnv in error state 3
+2005-12-04 08:21:10,error,10.0.0.5,client denied by server configuration: /secure
+2005-12-04 08:34:35,notice,::1,jk2_init() Can't connect to Apache: 13 (Permission denied)
+2005-12-04 08:47:59,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 09:01:24,error,192.168.1.12,mod_jk child workerEnv in error state 6
+2005-12-04 09:14:49,notice,::1,workerEnv in error state 3
+2005-12-04 09:28:13,notice,localhost,Apache/2.0.52 configured -- resuming normal operations
+2005-12-04 09:41:38,error,127.0.0.1,File does not exist: /var/www/html/wp-login.php

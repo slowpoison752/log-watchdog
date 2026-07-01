@@ -1,0 +1,51 @@
+timestamp,severity,source,service,pid,message
+2005-06-09 00:01:20,info,combo,cron,2304,CRON pam_unix(crond:session): session opened for user root by (uid=0)
+2005-06-09 00:17:44,info,combo,PAM,2305,pam_unix(sshd:session): session opened for user root by (uid=0)
+2005-06-09 00:34:08,info,combo,sshd,2306,Accepted password for root from 192.168.1.10 port 45983 ssh2
+2005-06-09 00:50:32,info,combo,PAM,2307,pam_unix(sshd:session): session closed for user root
+2005-06-09 01:06:55,warn,combo,named,2308,notify from 192.168.1.1#53: zone transfer refused
+2005-06-09 01:23:19,info,combo,cron,2309,CRON pam_unix(crond:session): session opened for user root by (uid=0)
+2005-06-09 01:39:43,warn,combo,vsftpd,2310,refused connect from 219.150.161.20 (219.150.161.20)
+2005-06-09 01:56:07,info,combo,PAM,2311,pam_unix(sshd:session): session opened for user backup by (uid=0)
+2005-06-09 02:12:31,info,combo,sshd,2312,Accepted password for backup from 192.168.1.11 port 22891 ssh2
+2005-06-09 02:28:55,warn,combo,xinetd,2313,SENSOR - denial of service from 61.177.172.25
+2005-06-09 02:45:19,info,combo,PAM,2314,pam_unix(sshd:session): session closed for user backup
+2005-06-09 03:01:43,info,combo,cron,2315,CRON pam_unix(crond:session): session opened for user root by (uid=0)
+2005-06-09 03:18:07,warn,combo,named,2316,notify from 192.168.1.1#53: zone transfer refused
+2005-06-09 03:34:31,info,combo,sshd,2317,Accepted password for root from 192.168.1.10 port 55123 ssh2
+2005-06-09 03:50:55,warn,combo,vsftpd,2318,refused connect from 218.188.2.4 (218.188.2.4)
+2005-06-09 04:07:19,info,combo,cron,2319,CRON pam_unix(crond:session): session opened for user root by (uid=0)
+2005-06-09 04:23:43,info,combo,PAM,2320,pam_unix(sshd:session): session opened for user root by (uid=0)
+2005-06-09 04:40:07,warn,combo,named,2321,notify from 192.168.1.1#53: zone transfer refused
+2005-06-09 04:56:31,info,combo,sshd,2322,Accepted password for root from 192.168.1.10 port 61204 ssh2
+2005-06-09 05:12:55,info,combo,PAM,2323,pam_unix(sshd:session): session closed for user root
+2005-06-09 05:29:19,warn,combo,xinetd,2324,SENSOR - denial of service from 219.150.161.20
+2005-06-09 05:45:43,info,combo,cron,2325,CRON pam_unix(crond:session): session opened for user root by (uid=0)
+2005-06-09 06:02:07,error,combo,sshd,19937,authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=220.135.151.1 user=root
+2005-06-09 06:02:44,error,combo,sshd,19938,Invalid user admin from 218.188.2.4
+2005-06-09 06:03:21,error,combo,sshd,19939,Failed password for illegal user test from 61.177.172.25 port 51813 ssh2
+2005-06-09 06:03:58,error,combo,sshd,19940,Invalid user guest from 220.135.151.1
+2005-06-09 06:04:35,error,combo,sshd,19941,authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4 user=root
+2005-06-09 06:05:12,error,combo,sshd,19942,Failed password for root from 61.177.172.25 port 52914 ssh2
+2005-06-09 06:05:49,error,combo,vsftpd,20001,FAIL LOGIN: Client "219.150.161.20"
+2005-06-09 06:06:26,error,combo,sshd,19943,Invalid user oracle from 220.135.151.1
+2005-06-09 06:07:03,error,combo,sshd,19944,authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=61.177.172.25 user=root
+2005-06-09 06:07:40,error,combo,sshd,19945,Failed password for illegal user postgres from 218.188.2.4 port 53819 ssh2
+2005-06-09 06:08:17,error,combo,sshd,19946,Invalid user test from 220.135.151.1
+2005-06-09 06:08:54,error,combo,sshd,19947,authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=219.150.161.20 user=root
+2005-06-09 06:09:31,error,combo,sshd,19948,Failed password for root from 61.177.172.25 port 54723 ssh2
+2005-06-09 06:10:08,error,combo,vsftpd,20002,FAIL LOGIN: Client "218.188.2.4"
+2005-06-09 06:10:45,error,combo,sshd,19949,Invalid user admin from 220.135.151.1
+2005-06-09 06:11:22,error,combo,sshd,19950,Failed password for illegal user user from 61.177.172.25 port 55628 ssh2
+2005-06-09 06:11:59,error,combo,logrotate,20200,error: failed to open config file /etc/logrotate.d/apache: No such file
+2005-06-09 06:12:36,error,combo,sshd,19951,authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4 user=root
+2005-06-09 06:20:00,info,combo,PAM,2326,pam_unix(sshd:session): session opened for user root by (uid=0)
+2005-06-09 06:36:24,info,combo,cron,2327,CRON pam_unix(crond:session): session opened for user root by (uid=0)
+2005-06-09 06:52:48,warn,combo,named,2328,notify from 192.168.1.1#53: zone transfer refused
+2005-06-09 07:09:12,info,combo,sshd,2329,Accepted password for root from 192.168.1.10 port 44312 ssh2
+2005-06-09 07:25:36,warn,combo,vsftpd,2330,refused connect from 61.177.172.25 (61.177.172.25)
+2005-06-09 07:42:00,info,combo,PAM,2331,pam_unix(sshd:session): session closed for user root
+2005-06-09 07:58:24,info,combo,cron,2332,CRON pam_unix(crond:session): session opened for user root by (uid=0)
+2005-06-09 08:14:48,warn,combo,xinetd,2333,SENSOR - denial of service from 220.135.151.1
+2005-06-09 08:31:12,info,combo,sshd,2334,Accepted password for root from 192.168.1.10 port 49821 ssh2
+2005-06-09 08:47:36,info,combo,PAM,2335,pam_unix(sshd:session): session opened for user root by (uid=0)

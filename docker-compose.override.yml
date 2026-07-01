@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Development overrides — automatically merged by `docker compose up`
+#
+# Differences from production:
+#   • Entire project dir is bind-mounted → uvicorn --reload picks up edits
+#   • Uses uvicorn directly (no gunicorn) for faster restarts
+#   • LOG_LEVEL=DEBUG
+#   • No resource limits (dev machines vary)
+#
+# To use production settings explicitly:
+#   docker compose -f docker-compose.yml up -d --build
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  watchdog:
+    volumes:
+      - .:/app                         # live code sync (overwrites COPY in image)
+      - watchdog_db:/app/watchdog_data # keep DB volume consistent
+    environment:
+      LOG_LEVEL: DEBUG
+      DB_PATH:   /app/watchdog_data/watchdog.db
+    command:
+      - uvicorn
+      - main:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - --reload
+      - --log-level
+      - debug
+    deploy:
+      resources: {}                    # remove limits in dev

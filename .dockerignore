@@ -1,0 +1,51 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+.Python
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+
+# ── Runtime artefacts (kept in Docker volumes, not the image) ─────────────────
+watchdog.db
+watchdog.db-shm
+watchdog.db-wal
+watchdog_data/
+
+# ── Secrets (never bake into image) ──────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Version control ───────────────────────────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ── IDE / OS ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Tests / CI ────────────────────────────────────────────────────────────────
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+
+# ── Docs (keep README.md for LABEL metadata) ──────────────────────────────────
+prompts.md
+
+# ── Docker files (avoid recursive context pollution) ──────────────────────────
+docker-compose*.yml
+Dockerfile*

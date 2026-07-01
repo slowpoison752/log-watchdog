@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intelligent Observability &amp; Event Watchdog</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁</text></svg>" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0b0f1a;
+      --surface:  #111827;
+      --surface2: #1c2333;
+      --border:   #2d3748;
+      --text:     #e2e8f0;
+      --muted:    #8b9cc0;
+      --blue:     #4c9ef5;
+      --green:    #2ec47c;
+      --amber:    #f5a623;
+      --red:      #e64040;
+      --purple:   #a855f7;
+      --radius:   8px;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-left h1  { font-size: 17px; font-weight: 700; letter-spacing: .3px; }
+    .header-left h1 span { color: var(--blue); }
+    .header-left p   { font-size: 11px; color: var(--muted); letter-spacing: .8px; margin-top: 2px; text-transform: uppercase; }
+
+    #health-pill {
+      padding: 5px 16px; border-radius: 999px; font-size: 12px; font-weight: 700;
+      letter-spacing: .8px; text-transform: uppercase; transition: all .3s;
+    }
+    #health-pill.HEALTHY  { background: rgba(46,196,124,.18); color: var(--green); border: 1px solid var(--green); }
+    #health-pill.DEGRADED { background: rgba(245,166,35,.18);  color: var(--amber); border: 1px solid var(--amber); }
+    #health-pill.CRITICAL { background: rgba(230,64,64,.25);   color: var(--red);   border: 1px solid var(--red); box-shadow: 0 0 10px rgba(230,64,64,.3); }
+
+    /* ── CONTROLS ───────────────────────────────────────── */
+    .controls {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+      padding: 11px 24px; background: var(--surface2); border-bottom: 1px solid var(--border);
+    }
+    .ctrl-group { display: flex; align-items: center; gap: 6px; }
+    .ctrl-group label { font-size: 11px; color: var(--muted); white-space: nowrap; text-transform: uppercase; letter-spacing: .4px; }
+    .controls select, .controls input[type=number] {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--radius); padding: 6px 10px; font-size: 13px; outline: none;
+    }
+    .controls input[type=number] { width: 72px; }
+    .controls select:focus, .controls input:focus { border-color: var(--blue); }
+
+    .btn {
+      padding: 7px 16px; border-radius: var(--radius); border: none; cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: opacity .2s, transform .1s; white-space: nowrap;
+    }
+    .btn:hover:not(:disabled) { opacity: .85; transform: translateY(-1px); }
+    .btn:active:not(:disabled){ transform: translateY(0); }
+    .btn-primary  { background: var(--blue);   color: #fff; }
+    .btn-accent   { background: #6366f1;        color: #fff; }
+    .btn-success  { background: var(--green);  color: #fff; }
+    .btn-danger   { background: var(--red);    color: #fff; }
+    .btn-outline  { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 12px; padding: 6px 12px; }
+    .btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+    .sep { width: 1px; height: 28px; background: var(--border); margin: 0 2px; }
+
+    /* spinner on loading buttons */
+    .btn.loading::after {
+      content: ''; display: inline-block; width: 10px; height: 10px;
+      border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+      border-radius: 50%; animation: spin .6s linear infinite; margin-left: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── STREAM PROGRESS ────────────────────────────────── */
+    .stream-bar-wrap { height: 3px; background: var(--border); }
+    .stream-bar { height: 3px; background: var(--blue); width: 0%; transition: width .25s linear; }
+
+    /* ── METRIC CARDS ───────────────────────────────────── */
+    .cards {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      padding: 20px 24px;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .card.blue::before   { background: var(--blue); }
+    .card.red::before    { background: var(--red); }
+    .card.amber::before  { background: var(--amber); }
+    .card.purple::before { background: var(--purple); }
+
+    .card-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
+    .card-value { font-size: 34px; font-weight: 700; margin: 8px 0 5px; line-height: 1; }
+    .card-sub   { font-size: 12px; color: var(--muted); }
+    .card.blue   .card-value { color: var(--blue); }
+    .card.red    .card-value { color: var(--red);  }
+    .card.amber  .card-value { color: var(--amber);}
+    .card.purple .card-value { color: var(--purple);}
+    .card-sub.high   { color: var(--red); }
+    .card-sub.normal { color: var(--amber); }
+    .card-sub.low    { color: var(--green); }
+
+    /* ── MAIN GRID ──────────────────────────────────────── */
+    .main-grid {
+      display: grid; grid-template-columns: 2fr 1fr; gap: 16px;
+      padding: 0 24px 16px;
+    }
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .panel-title {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .6px;
+    }
+    .panel-badge {
+      font-size: 11px; font-weight: 700; padding: 2px 10px;
+      border-radius: 999px; background: rgba(230,64,64,.15); color: var(--red); border: 1px solid var(--red);
+    }
+    .panel-badge.blue { background: rgba(76,158,245,.15); color: var(--blue); border-color: var(--blue); }
+    .panel-badge.purple { background: rgba(168,85,247,.15); color: var(--purple); border-color: var(--purple); }
+
+    .chart-wrap { position: relative; }
+    .chart-wrap canvas { max-height: 270px; }
+    .side-charts { display: flex; flex-direction: column; gap: 16px; }
+    .side-charts .chart-wrap canvas { max-height: 175px; }
+
+    /* ── BOTTOM GRID ────────────────────────────────────── */
+    .bottom-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      padding: 0 24px 24px;
+    }
+
+    /* ── TABLE ──────────────────────────────────────────── */
+    .stream-table-wrap {
+      overflow-y: auto; max-height: 340px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th {
+      position: sticky; top: 0; background: var(--surface2);
+      padding: 8px 10px; text-align: left; font-weight: 600;
+      color: var(--muted); border-bottom: 1px solid var(--border); z-index: 2;
+    }
+    tbody tr { border-bottom: 1px solid rgba(45,55,72,.6); transition: background .1s; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 6px 10px; vertical-align: middle; }
+    .td-msg { max-width: 240px; word-break: break-word; font-size: 11px; color: #c0cee0; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap;
+    }
+    .badge-fatal   { background: rgba(230,64,64,.2);   color: #ff7070; border: 1px solid rgba(230,64,64,.5); }
+    .badge-error   { background: rgba(230,64,64,.12);  color: #f87171; border: 1px solid rgba(248,113,113,.4); }
+    .badge-warning,.badge-warn { background: rgba(245,166,35,.18); color: var(--amber); border: 1px solid rgba(245,166,35,.4); }
+    .badge-info    { background: rgba(76,158,245,.12); color: var(--blue); border: 1px solid rgba(76,158,245,.3); }
+    .badge-notice  { background: rgba(96,165,250,.1);  color: #60a5fa; border: 1px solid rgba(96,165,250,.3); }
+    .badge-spike     { background: rgba(230,64,64,.2);  color: var(--red);    border: 1px solid rgba(230,64,64,.5); }
+    .badge-threshold { background: rgba(245,166,35,.2); color: var(--amber);  border: 1px solid rgba(245,166,35,.4); }
+    .badge-src { background: rgba(76,158,245,.08); color: var(--muted); border: 1px solid var(--border); font-size: 10px; padding: 1px 6px; }
+
+    /* ── WEBHOOK PANEL ──────────────────────────────────── */
+    .wh-list { overflow-y: auto; max-height: 330px; }
+    .wh-item {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 8px; overflow: hidden;
+    }
+    .wh-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; background: var(--surface2); cursor: pointer;
+      transition: background .15s;
+    }
+    .wh-header:hover { background: #232c3d; }
+    .wh-summary { flex: 1; font-size: 12px; }
+    .wh-ts { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .wh-body { display: none; padding: 10px 12px; background: var(--bg); }
+    .wh-body.open { display: block; }
+    .wh-json {
+      font-family: 'Courier New', monospace; font-size: 11px; color: #86efac;
+      white-space: pre-wrap; word-break: break-all;
+      background: #0d1117; border-radius: 4px; padding: 8px; max-height: 160px; overflow-y: auto;
+    }
+    .expand-arrow { font-size: 10px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+    .expand-arrow.open { transform: rotate(180deg); }
+
+    /* ── EMPTY STATE ────────────────────────────────────── */
+    .empty { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* ── TOAST ──────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-left: 3px solid var(--blue);
+      border-radius: var(--radius); padding: 10px 18px; font-size: 13px;
+      max-width: 380px; opacity: 0; transition: opacity .3s; pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+
+    @media (max-width: 1100px) {
+      .main-grid   { grid-template-columns: 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .cards       { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <h1>Intelligent Observability &amp; <span>Event Watchdog</span></h1>
+    <p>SRE Log Anomaly Detection &middot; Real-Time Health Monitor</p>
+  </div>
+  <div id="health-pill" class="HEALTHY">HEALTHY</div>
+</header>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Dataset</label>
+    <select id="ctrl-source">
+      <option value="all">All Sources (Combined)</option>
+      <option value="apache">Apache</option>
+      <option value="bgl">BGL</option>
+      <option value="linux">Linux</option>
+    </select>
+  </div>
+
+  <div class="ctrl-group">
+    <label>Z-Score Threshold</label>
+    <input type="number" id="ctrl-z" value="2.0" step="0.1" min="0.5" max="10" />
+  </div>
+
+  <div class="ctrl-group">
+    <label>Error Rate Window</label>
+    <select id="ctrl-window">
+      <option value="5">5 min</option>
+      <option value="15" selected>15 min</option>
+      <option value="30">30 min</option>
+      <option value="60">60 min</option>
+    </select>
+  </div>
+
+  <div class="ctrl-group">
+    <label>Method</label>
+    <select id="ctrl-method">
+      <option value="zscore">Z-Score</option>
+      <option value="iqr">IQR</option>
+      <option value="moving_average">Moving Avg</option>
+    </select>
+  </div>
+
+  <div class="sep"></div>
+
+  <button class="btn btn-primary"  id="btn-ingest">Ingest Logs</button>
+  <button class="btn btn-accent"   id="btn-analyze">Run Analysis</button>
+  <button class="btn btn-success"  id="btn-stream">Simulate Live Feed</button>
+  <button class="btn btn-danger"   id="btn-stop" disabled>Stop</button>
+
+  <div class="sep"></div>
+
+  <button class="btn btn-outline" id="btn-dl-apache">↓ Apache CSV</button>
+  <button class="btn btn-outline" id="btn-dl-bgl">↓ BGL CSV</button>
+  <button class="btn btn-outline" id="btn-dl-linux">↓ Linux CSV</button>
+  <button class="btn btn-outline" id="btn-dl-all">↓ All Combined</button>
+</div>
+
+<!-- STREAM PROGRESS BAR -->
+<div class="stream-bar-wrap"><div class="stream-bar" id="stream-bar"></div></div>
+
+<!-- METRIC CARDS -->
+<div class="cards">
+  <div class="card blue">
+    <div class="card-label">Total Log Entries</div>
+    <div class="card-value" id="m-total">—</div>
+    <div class="card-sub"  id="m-sources">Awaiting ingest</div>
+  </div>
+  <div class="card red">
+    <div class="card-label">Error / Fatal Rate</div>
+    <div class="card-value" id="m-errrate">—</div>
+    <div class="card-sub"  id="m-errlabel">— error events</div>
+  </div>
+  <div class="card amber">
+    <div class="card-label">Anomalies Detected</div>
+    <div class="card-value" id="m-anomalies">—</div>
+    <div class="card-sub"  id="m-anomalylabel">Run Analysis to detect</div>
+  </div>
+  <div class="card purple">
+    <div class="card-label">Webhooks Triggered</div>
+    <div class="card-value" id="m-webhooks">—</div>
+    <div class="card-sub"  id="m-webhooklabel">Alert notifications</div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Error Rate Over Time</span>
+      <span class="panel-badge" id="anomaly-badge" style="display:none"></span>
+    </div>
+    <div class="chart-wrap"><canvas id="chart-errrate"></canvas></div>
+  </div>
+
+  <div class="side-charts">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Severity Distribution</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-severity"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Source Breakdown</span>
+        <span class="panel-badge blue" id="src-badge" style="display:none"></span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-source"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM GRID -->
+<div class="bottom-grid">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Live Log Stream</span>
+      <span class="panel-badge blue" id="log-count"></span>
+    </div>
+    <div class="stream-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>Timestamp</th>
+            <th>Source</th>
+            <th class="td-msg">Message</th>
+          </tr>
+        </thead>
+        <tbody id="log-tbody">
+          <tr><td colspan="4" class="empty">Logs load automatically on startup — or click Ingest Logs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Webhook Alert Log</span>
+      <span class="panel-badge purple" id="wh-count"></span>
+    </div>
+    <div class="wh-list" id="wh-list">
+      <div class="empty">Run Analysis to see webhook alerts</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   State
+───────────────────────────────────────────────────────── */
+const S = {
+  ws: null, streaming: false,
+  streamLogs: [], streamBuckets: {},
+  chartErr: null, chartSev: null, chartSrc: null,
+  currentMetrics: null,
+};
+
+/* ─────────────────────────────────────────────────────────
+   Utilities
+───────────────────────────────────────────────────────── */
+const API = async (path) => {
+  const r = await fetch(path);
+  return r.json();
+};
+
+function toast(msg, ms = 3500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function fmtTs(ts) {
+  if (!ts) return '—';
+  return String(ts).replace('T', ' ').slice(0, 19);
+}
+
+function severityBadge(sev) {
+  const s = (sev || 'info').toLowerCase();
+  return `<span class="badge badge-${s}">${s}</span>`;
+}
+
+function setLoading(btnId, on) {
+  const el = document.getElementById(btnId);
+  if (on) { el.classList.add('loading'); el.disabled = true; }
+  else     { el.classList.remove('loading'); el.disabled = false; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Charts
+───────────────────────────────────────────────────────── */
+const SEV_COLORS = {
+  fatal: '#e64040', error: '#f87171', warning: '#f5a623',
+  warn: '#f5a623', info: '#4c9ef5', notice: '#60a5fa',
+};
+const SRC_COLORS = ['#4c9ef5', '#2ec47c', '#f5a623', '#a855f7'];
+const CHART_OPTS = {
+  responsive: true, maintainAspectRatio: true,
+  plugins: { legend: { labels: { color: '#8b9cc0', boxWidth: 12, font: { size: 11 } } } },
+};
+
+function initCharts() {
+  Chart.defaults.color = '#8b9cc0';
+
+  S.chartErr = new Chart(document.getElementById('chart-errrate'), {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label: 'Errors', data: [], borderColor: '#e64040', backgroundColor: 'rgba(230,64,64,0.10)', fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2 },
+      { label: 'Total',  data: [], borderColor: '#4c9ef5', borderDash: [6,3], fill: false, tension: 0.4, pointRadius: 2, borderWidth: 1.5 },
+      { label: 'Anomaly', data: [], type: 'scatter', pointRadius: 10, pointStyle: 'triangle', backgroundColor: '#e64040', borderColor: '#ff4040' },
+    ]},
+    options: { ...CHART_OPTS, scales: {
+      x: { ticks: { color: '#8b9cc0', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: 'rgba(45,55,72,.5)' } },
+      y: { ticks: { color: '#8b9cc0' }, grid: { color: 'rgba(45,55,72,.5)' }, beginAtZero: true },
+    }},
+  });
+
+  S.chartSev = new Chart(document.getElementById('chart-severity'), {
+    type: 'bar',
+    data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 3 }] },
+    options: { ...CHART_OPTS, indexAxis: 'y',
+      plugins: { ...CHART_OPTS.plugins, legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8b9cc0' }, grid: { color: 'rgba(45,55,72,.5)' }, beginAtZero: true },
+        y: { ticks: { color: '#8b9cc0', font: { size: 11 } }, grid: { color: 'transparent' } },
+      }
+    },
+  });
+
+  S.chartSrc = new Chart(document.getElementById('chart-source'), {
+    type: 'doughnut',
+    data: { labels: [], datasets: [{ data: [], backgroundColor: SRC_COLORS, borderWidth: 2, borderColor: '#111827' }] },
+    options: { ...CHART_OPTS, cutout: '62%' },
+  });
+}
+
+function updateErrChart(results) {
+  if (!results || results.length === 0) return;
+  const labels  = results.map(r => r.window_start ? String(r.window_start).slice(5, 16).replace('T', ' ') : '');
+  const errors  = results.map(r => r.error_count);
+  const totals  = results.map(r => r.total_events);
+  const anomaly = results.map((r, i) => r.is_anomaly ? { x: i, y: r.error_count } : null).filter(Boolean);
+
+  S.chartErr.data.labels           = labels;
+  S.chartErr.data.datasets[0].data = errors;
+  S.chartErr.data.datasets[1].data = totals;
+  S.chartErr.data.datasets[2].data = anomaly;
+  S.chartErr.update();
+
+  const badge = document.getElementById('anomaly-badge');
+  if (anomaly.length > 0) {
+    badge.textContent = `${anomaly.length} anomalies`;
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function updateSevChart(dist) {
+  const entries = Object.entries(dist).sort((a, b) => b[1] - a[1]);
+  S.chartSev.data.labels                         = entries.map(([k]) => k.toUpperCase());
+  S.chartSev.data.datasets[0].data               = entries.map(([, v]) => v);
+  S.chartSev.data.datasets[0].backgroundColor    = entries.map(([k]) => SEV_COLORS[k] || '#8b9cc0');
+  S.chartSev.update();
+}
+
+function updateSrcChart(breakdown) {
+  const keys = Object.keys(breakdown).filter(k => breakdown[k].count > 0);
+  S.chartSrc.data.labels            = keys.map(k => k.toUpperCase());
+  S.chartSrc.data.datasets[0].data  = keys.map(k => breakdown[k].count);
+  S.chartSrc.update();
+
+  const badge = document.getElementById('src-badge');
+  if (keys.length > 0) {
+    badge.textContent = `${keys.length} sources`;
+    badge.style.display = '';
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Metrics
+───────────────────────────────────────────────────────── */
+async function refreshMetrics() {
+  const m = await API('/api/metrics');
+  S.currentMetrics = m;
+
+  document.getElementById('m-total').textContent     = m.total_logs.toLocaleString();
+  document.getElementById('m-anomalies').textContent = m.anomaly_count;
+  document.getElementById('m-webhooks').textContent  = m.webhook_count;
+
+  // Error rate with HIGH/NORMAL/LOW label
+  const rate = m.error_rate || 0;
+  document.getElementById('m-errrate').textContent = rate + '%';
+  const errLabel = document.getElementById('m-errlabel');
+  if (rate > 40) {
+    errLabel.textContent = `HIGH — above 40%`;
+    errLabel.className   = 'card-sub high';
+  } else if (rate > 10) {
+    errLabel.textContent = `ELEVATED — ${m.error_count.toLocaleString()} error events`;
+    errLabel.className   = 'card-sub normal';
+  } else {
+    errLabel.textContent = `${m.error_count.toLocaleString()} error events`;
+    errLabel.className   = 'card-sub low';
+  }
+
+  // Anomaly label
+  const aLabel = document.getElementById('m-anomalylabel');
+  aLabel.textContent = m.anomaly_count > 0
+    ? `${m.anomaly_count} Z-score spike(s)`
+    : 'No anomalies — system nominal';
+  aLabel.className = 'card-sub ' + (m.anomaly_count > 0 ? 'high' : 'low');
+
+  // Webhook label
+  document.getElementById('m-webhooklabel').textContent =
+    m.webhook_count > 0 ? `${m.webhook_count} alert notification(s)` : 'Alert notifications';
+
+  // Sources
+  const srcParts = Object.entries(m.sources || {}).map(([k, v]) => `${k}: ${v}`).join(' · ');
+  document.getElementById('m-sources').textContent = srcParts || 'Across all sources';
+
+  // Health pill
+  const pill = document.getElementById('health-pill');
+  pill.textContent = m.health_status;
+  pill.className   = m.health_status;
+
+  return m;
+}
+
+async function refreshSeverity() {
+  const src = document.getElementById('ctrl-source').value;
+  const d   = await API(`/api/severity-distribution?source=${src}`);
+  if (d.distribution && Object.keys(d.distribution).length > 0) updateSevChart(d.distribution);
+}
+
+async function refreshSourceBreakdown() {
+  const d = await API('/api/source-breakdown');
+  if (d.breakdown) updateSrcChart(d.breakdown);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Webhooks
+───────────────────────────────────────────────────────── */
+async function refreshWebhooks() {
+  const d    = await API('/api/webhooks');
+  const list = document.getElementById('wh-list');
+  const cnt  = document.getElementById('wh-count');
+  cnt.textContent = d.count > 0 ? `${d.count} alerts` : '';
+
+  if (!d.webhooks || d.webhooks.length === 0) {
+    list.innerHTML = '<div class="empty">Run Analysis to generate webhook alerts</div>';
+    return;
+  }
+
+  list.innerHTML = d.webhooks.map((w, i) => {
+    const isCrit   = w.severity === 'CRITICAL';
+    const bCls     = isCrit ? 'badge-spike' : 'badge-threshold';
+    const label    = isCrit ? 'SPIKE' : 'THRESHOLD';
+    const summary  = `${(w.source||'').toUpperCase()} · ${w.error_count} errors · z=${parseFloat(w.z_score||0).toFixed(2)}`;
+    const jsonStr  = JSON.stringify(w.payload_json || {}, null, 2);
+    return `
+      <div class="wh-item">
+        <div class="wh-header" onclick="toggleWh(${i})">
+          <span class="badge ${bCls}">${label}</span>
+          <span class="wh-summary">${summary}</span>
+          <span class="wh-ts">${fmtTs(w.created_at).slice(11,19)}</span>
+          <span class="expand-arrow" id="arr-${i}">▾</span>
+        </div>
+        <div class="wh-body" id="wh-body-${i}">
+          <div class="wh-json">${jsonStr}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleWh(i) {
+  document.getElementById(`wh-body-${i}`).classList.toggle('open');
+  document.getElementById(`arr-${i}`).classList.toggle('open');
+}
+
+/* ─────────────────────────────────────────────────────────
+   Log Table
+───────────────────────────────────────────────────────── */
+const MAX_ROWS = 300;
+
+async function refreshLogTable(limit = 100) {
+  const src = document.getElementById('ctrl-source').value;
+  const d   = await API(`/api/logs?source=${src}&limit=${limit}`);
+  const tbody = document.getElementById('log-tbody');
+  document.getElementById('log-count').textContent = `${d.total} entries`;
+
+  if (!d.logs || d.logs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">No logs — click Ingest Logs</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = d.logs.slice(-MAX_ROWS).reverse().map(log => `
+    <tr>
+      <td>${severityBadge(log.severity)}</td>
+      <td style="white-space:nowrap;font-size:11px;color:var(--muted);">${fmtTs(log.timestamp)}</td>
+      <td><span class="badge badge-src">${(log.log_source || log.source || '—').toUpperCase()}</span></td>
+      <td class="td-msg">${(log.message || '').slice(0, 110)}</td>
+    </tr>`).join('');
+}
+
+function appendStreamRow(log) {
+  const tbody = document.getElementById('log-tbody');
+  if (tbody.querySelector('.empty')) tbody.innerHTML = '';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${severityBadge(log.severity)}</td>
+    <td style="white-space:nowrap;font-size:11px;color:var(--muted);">${fmtTs(log.timestamp)}</td>
+    <td><span class="badge badge-src">${((log.log_source||log.source)||'?').toUpperCase()}</span></td>
+    <td class="td-msg">${(log.message||'').slice(0,110)}</td>`;
+  tbody.insertBefore(tr, tbody.firstChild);
+  while (tbody.rows.length > MAX_ROWS) tbody.deleteRow(tbody.rows.length - 1);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Ingest & Analysis helpers
+───────────────────────────────────────────────────────── */
+async function runAnalysis(silent = false) {
+  const src    = document.getElementById('ctrl-source').value;
+  const z      = document.getElementById('ctrl-z').value;
+  const win    = document.getElementById('ctrl-window').value;
+  const method = document.getElementById('ctrl-method').value;
+  if (!silent) setLoading('btn-analyze', true);
+  try {
+    const d = await API(`/api/analyze?source=${src}&window=${win}&z_threshold=${z}&method=${method}`);
+    if (d.error) { toast('⚠ ' + d.error, 5000); return null; }
+    updateErrChart(d.results || []);
+    await Promise.all([refreshMetrics(), refreshWebhooks()]);
+    if (!silent) toast(`✓ ${d.anomaly_count} anomalies · ${d.webhooks_triggered} webhooks fired`);
+    return d;
+  } finally {
+    if (!silent) setLoading('btn-analyze', false);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Button handlers
+───────────────────────────────────────────────────────── */
+document.getElementById('btn-ingest').addEventListener('click', async () => {
+  const src = document.getElementById('ctrl-source').value;
+  setLoading('btn-ingest', true);
+  toast('Ingesting logs…');
+  try {
+    const d = await API(`/api/logs/ingest?source=${src}`);
+    toast(`✓ ${d.ingested} logs ingested — running analysis…`);
+    await Promise.all([refreshMetrics(), refreshSeverity(), refreshSourceBreakdown(), refreshLogTable()]);
+    await runAnalysis(true);
+    toast(`✓ Ready — data loaded and analysed`);
+  } finally {
+    setLoading('btn-ingest', false);
+  }
+});
+
+document.getElementById('btn-analyze').addEventListener('click', () => runAnalysis(false));
+
+/* ─────────────────────────────────────────────────────────
+   WebSocket live stream
+───────────────────────────────────────────────────────── */
+const ERR_SEVS = new Set(['error','fatal','warning','warn']);
+const STREAM_WIN_MIN = 5;
+
+function bucketKey(ts) {
+  try {
+    const d = new Date(String(ts).replace(' ', 'T'));
+    const w = STREAM_WIN_MIN * 60 * 1000;
+    return new Date(Math.floor(d.getTime() / w) * w).toISOString().slice(0, 16).replace('T', ' ');
+  } catch { return '??:??'; }
+}
+
+function ingestStreamLog(log) {
+  const key = bucketKey(log.timestamp || '');
+  if (!S.streamBuckets[key]) S.streamBuckets[key] = { errors: 0, total: 0 };
+  S.streamBuckets[key].total++;
+  if (ERR_SEVS.has((log.severity || '').toLowerCase())) S.streamBuckets[key].errors++;
+}
+
+function redrawStreamChart() {
+  const keys   = Object.keys(S.streamBuckets).sort();
+  const labels = keys.map(k => k.slice(5));
+  S.chartErr.data.labels           = labels;
+  S.chartErr.data.datasets[0].data = keys.map(k => S.streamBuckets[k].errors);
+  S.chartErr.data.datasets[1].data = keys.map(k => S.streamBuckets[k].total);
+  S.chartErr.data.datasets[2].data = [];
+  S.chartErr.update('none');
+}
+
+function startStream() {
+  const src   = document.getElementById('ctrl-source').value;
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  S.streamBuckets = {};
+  S.streamLogs    = [];
+  S.streaming     = true;
+  let received    = 0;
+
+  document.getElementById('btn-stream').disabled = true;
+  document.getElementById('btn-stop').disabled   = false;
+  document.getElementById('log-tbody').innerHTML =
+    '<tr><td colspan="4" class="empty" style="padding:16px;">Connecting to stream…</td></tr>';
+
+  S.ws = new WebSocket(`${proto}://${location.host}/api/stream?source=${src}`);
+
+  S.ws.onmessage = (evt) => {
+    const log = JSON.parse(evt.data);
+    if (log._error) { toast('⚠ ' + log._error, 5000); stopStream(); return; }
+    if (log._done)  { toast(`✓ Stream complete — ${received} logs delivered`); stopStream(); return; }
+
+    received++;
+    appendStreamRow(log);
+    ingestStreamLog(log);
+    document.getElementById('log-count').textContent = `${received} entries`;
+
+    const pct = log._total ? (log._index / log._total * 100) : 0;
+    document.getElementById('stream-bar').style.width = pct + '%';
+
+    if (received % 8 === 0) redrawStreamChart();
+  };
+
+  S.ws.onerror = () => { toast('WebSocket error — is the server running?', 5000); stopStream(); };
+  S.ws.onclose = () => { if (S.streaming) stopStream(); };
+}
+
+function stopStream() {
+  S.streaming = false;
+  if (S.ws) { try { S.ws.close(); } catch (e) {} S.ws = null; }
+  document.getElementById('btn-stream').disabled = false;
+  document.getElementById('btn-stop').disabled   = true;
+  document.getElementById('stream-bar').style.width = '100%';
+  setTimeout(() => { document.getElementById('stream-bar').style.width = '0%'; }, 1200);
+  redrawStreamChart();
+  refreshMetrics();
+}
+
+document.getElementById('btn-stream').addEventListener('click', startStream);
+document.getElementById('btn-stop').addEventListener('click', stopStream);
+
+/* ─────────────────────────────────────────────────────────
+   CSV Download (client-side)
+───────────────────────────────────────────────────────── */
+async function downloadCsv(source) {
+  toast(`Preparing ${source} CSV…`);
+  const d = await API(`/api/logs?source=${source}&limit=10000`);
+  if (!d.logs || d.logs.length === 0) { toast('No data to download'); return; }
+  const cols  = ['id','timestamp','severity','source','message','log_source'];
+  const rows  = d.logs.map(r => cols.map(c => `"${String(r[c]||'').replace(/"/g,'""')}"`).join(','));
+  const csv   = [cols.join(','), ...rows].join('\n');
+  const a     = Object.assign(document.createElement('a'), {
+    href:     URL.createObjectURL(new Blob([csv], { type: 'text/csv' })),
+    download: `${source}_logs.csv`,
+  });
+  a.click();
+}
+
+document.getElementById('btn-dl-apache').addEventListener('click', () => downloadCsv('apache'));
+document.getElementById('btn-dl-bgl').addEventListener('click',    () => downloadCsv('bgl'));
+document.getElementById('btn-dl-linux').addEventListener('click',  () => downloadCsv('linux'));
+document.getElementById('btn-dl-all').addEventListener('click',    () => downloadCsv('all'));
+
+/* ─────────────────────────────────────────────────────────
+   Init — auto-run analysis if DB is already populated
+───────────────────────────────────────────────────────── */
+(async function init() {
+  initCharts();
+  try {
+    const m = await refreshMetrics();
+    await Promise.all([refreshSeverity(), refreshSourceBreakdown(), refreshWebhooks(), refreshLogTable()]);
+
+    if (m && m.total_logs > 0) {
+      // Data already in DB (auto-ingested on startup) — run analysis automatically
+      toast(`${m.total_logs} logs loaded — running analysis…`, 5000);
+      await runAnalysis(true);
+      toast('✓ Dashboard ready');
+    }
+  } catch (e) {
+    console.error(e);
+    toast('Could not connect to API — is the server running?', 5000);
+  }
+})();
+</script>
+</body>
+</html>

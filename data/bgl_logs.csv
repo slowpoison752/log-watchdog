@@ -1,0 +1,51 @@
+timestamp,severity,source,component,node,message
+2005-06-03 00:02:50,INFO,R00-M0-N0-C:J00-U01,KERNEL,R00-M0-N0,instruction cache parity error corrected
+2005-06-03 00:18:22,INFO,R01-M0-N4-C:J05-U11,KERNEL,R01-M0-N4,data cache parity error corrected
+2005-06-03 00:34:55,INFO,R02-M1-N0-C:J12-U11,KERNEL,R02-M1-N0,ECC corrected single-symbol error
+2005-06-03 00:51:27,WARNING,R03-M0-N2-C:J08-U07,APPREAD,R03-M0-N2,ciod: failed to read message prefix
+2005-06-03 01:08:00,INFO,R04-M1-N3-C:J14-U09,KERNEL,R04-M1-N3,instruction cache parity error corrected
+2005-06-03 01:24:32,INFO,R05-M0-N1-C:J02-U03,KERNEL,R05-M0-N1,data cache parity error corrected
+2005-06-03 01:41:05,WARNING,R06-M1-N5-C:J10-U05,DISC,R06-M1-N5,DISCOVERY node variance threshold exceeded
+2005-06-03 01:57:37,INFO,R07-M0-N7-C:J01-U02,KERNEL,R07-M0-N7,corrected parity error ECC recovered
+2005-06-03 02:14:10,INFO,R08-M1-N2-C:J06-U08,KERNEL,R08-M1-N2,instruction cache parity error corrected
+2005-06-03 02:30:42,WARNING,R09-M0-N6-C:J03-U04,APPREAD,R09-M0-N6,ciod: failed to read message prefix
+2005-06-03 02:47:15,INFO,R10-M0-N0-C:J07-U06,KERNEL,R10-M0-N0,data cache parity error corrected
+2005-06-03 03:03:47,INFO,R11-M1-N1-C:J09-U10,KERNEL,R11-M1-N1,ECC corrected single-symbol error
+2005-06-03 03:20:20,INFO,R12-M0-N3-C:J11-U12,KERNEL,R12-M0-N3,instruction cache parity error corrected
+2005-06-03 03:36:52,WARNING,R13-M1-N4-C:J13-U13,DISC,R13-M1-N4,DISCOVERY: node variance threshold exceeded
+2005-06-03 03:53:25,INFO,R14-M0-N5-C:J04-U14,KERNEL,R14-M0-N5,data cache parity error corrected
+2005-06-03 04:09:57,INFO,R15-M1-N6-C:J15-U15,KERNEL,R15-M1-N6,corrected parity error ECC recovered
+2005-06-03 04:26:30,INFO,R00-M0-N7-C:J00-U16,KERNEL,R00-M0-N7,instruction cache parity error corrected
+2005-06-03 04:43:02,WARNING,R01-M1-N0-C:J05-U17,APPREAD,R01-M1-N0,ciod: failed to read message prefix
+2005-06-03 04:59:35,INFO,R02-M0-N1-C:J12-U18,KERNEL,R02-M0-N1,data cache parity error corrected
+2005-06-03 05:16:07,INFO,R03-M1-N2-C:J08-U19,KERNEL,R03-M1-N2,ECC corrected single-symbol error
+2005-06-03 05:32:40,FATAL,R04-M0-N3-C:J14-U20,KERNEL,R04-M0-N3,program interrupt
+2005-06-03 05:35:13,FATAL,R04-M1-N3-C:J14-U09,KERNEL,R04-M1-N3,machine check: store operation
+2005-06-03 05:36:45,FATAL,R05-M0-N4-C:J02-U21,KERNEL,R05-M0-N4,floating point unavailable
+2005-06-03 05:37:18,FATAL,R05-M1-N5-C:J10-U22,APP,R05-M1-N5,ciod: Error reading message from CIU
+2005-06-03 05:37:50,FATAL,R06-M0-N6-C:J03-U23,KERNEL,R06-M0-N6,program interrupt: data address compare
+2005-06-03 05:38:23,FATAL,R06-M1-N7-C:J09-U24,KERNEL,R06-M1-N7,machine check exception
+2005-06-03 05:38:55,FATAL,R07-M0-N0-C:J01-U25,KERNEL,R07-M0-N0,machine check: store operation
+2005-06-03 05:39:28,FATAL,R07-M1-N1-C:J07-U26,APP,R07-M1-N1,ciod: Error reading message from CIU
+2005-06-03 05:40:00,FATAL,R08-M0-N2-C:J11-U27,KERNEL,R08-M0-N2,floating point unavailable interrupt
+2005-06-03 05:40:33,FATAL,R08-M1-N3-C:J13-U28,KERNEL,R08-M1-N3,program interrupt: alignment
+2005-06-03 05:41:05,FATAL,R09-M0-N4-C:J04-U29,KERNEL,R09-M0-N4,machine check interrupt: machine check exception
+2005-06-03 05:41:38,FATAL,R09-M1-N5-C:J15-U30,APP,R09-M1-N5,ciod: Error in request from compute node
+2005-06-03 05:42:10,FATAL,R10-M0-N6-C:J00-U31,KERNEL,R10-M0-N6,program interrupt: data address compare
+2005-06-03 05:49:43,INFO,R11-M1-N7-C:J05-U32,KERNEL,R11-M1-N7,ECC corrected single-symbol error
+2005-06-03 06:06:15,INFO,R12-M0-N0-C:J12-U33,KERNEL,R12-M0-N0,instruction cache parity error corrected
+2005-06-03 06:22:48,WARNING,R13-M1-N1-C:J08-U34,APPREAD,R13-M1-N1,ciod: failed to read message prefix
+2005-06-03 06:39:20,INFO,R14-M0-N2-C:J14-U35,KERNEL,R14-M0-N2,data cache parity error corrected
+2005-06-03 06:55:53,INFO,R15-M1-N3-C:J02-U36,KERNEL,R15-M1-N3,corrected parity error ECC recovered
+2005-06-03 07:12:25,INFO,R00-M0-N4-C:J10-U37,KERNEL,R00-M0-N4,instruction cache parity error corrected
+2005-06-03 07:28:58,WARNING,R01-M1-N5-C:J03-U38,DISC,R01-M1-N5,DISCOVERY: node variance threshold exceeded
+2005-06-03 07:45:30,INFO,R02-M0-N6-C:J09-U39,KERNEL,R02-M0-N6,data cache parity error corrected
+2005-06-03 08:02:03,INFO,R03-M1-N7-C:J01-U40,KERNEL,R03-M1-N7,ECC corrected single-symbol error
+2005-06-03 08:18:35,INFO,R04-M0-N0-C:J07-U41,KERNEL,R04-M0-N0,instruction cache parity error corrected
+2005-06-03 08:35:08,WARNING,R05-M1-N1-C:J11-U42,APPREAD,R05-M1-N1,ciod: failed to read message prefix
+2005-06-03 08:51:40,INFO,R06-M0-N2-C:J13-U43,KERNEL,R06-M0-N2,data cache parity error corrected
+2005-06-03 09:08:13,INFO,R07-M1-N3-C:J04-U44,KERNEL,R07-M1-N3,corrected parity error ECC recovered
+2005-06-03 09:24:45,INFO,R08-M0-N4-C:J15-U45,KERNEL,R08-M0-N4,instruction cache parity error corrected
+2005-06-03 09:41:18,INFO,R09-M1-N5-C:J00-U46,KERNEL,R09-M1-N5,data cache parity error corrected
+2005-06-03 09:57:50,WARNING,R10-M0-N6-C:J05-U47,DISC,R10-M0-N6,DISCOVERY: node variance threshold exceeded
+2005-06-03 10:14:23,INFO,R11-M1-N7-C:J12-U48,KERNEL,R11-M1-N7,ECC corrected single-symbol error
