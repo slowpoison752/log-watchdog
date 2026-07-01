@@ -5,6 +5,8 @@
 🔗 *The Connector* — AI Readiness Type · Tagle.ai
 *"You bring people together to make AI work for everyone"*
 
+![Tagle Tag](tagle_tag..png)
+
 > Built in a single session using AI-directed, human-in-the-loop development.
 > Zero cloud dependencies · SQLite · FastAPI · Docker-ready
 
@@ -317,4 +319,4 @@ SQLite                  →        TimescaleDB for time-series queries
 ---
 
 *Built by Aditya Patil · The Connector (Tagle.ai) · July 2026*
-*Repository: `github.com/<you>/log-watchdog`*
+*Repository: [github.com/slowpoison752/log-watchdog](https://github.com/slowpoison752/log-watchdog)*
